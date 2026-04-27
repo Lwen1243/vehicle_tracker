@@ -61,15 +61,16 @@ events:
 # ==================== UniTS 模型配置 ====================
 model:
   # 模型类型: "units" 使用官方UniTS, "simple_tsc" 使用简化版Transformer
-  type: "simple_tsc"
+  type: "units"
   
   # UniTS 特有参数（仅 type=units 时有效）
+  # patch_len 必须等于 stride（官方要求非重叠patch）
   units:
     d_model: 128
     n_heads: 8
     e_layers: 2
-    patch_len: 4
-    stride: 2
+    patch_len: 8
+    stride: 8
     prompt_num: 3
     dropout: 0.1
     
