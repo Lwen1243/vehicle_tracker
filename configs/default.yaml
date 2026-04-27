@@ -1,0 +1,107 @@
+# 道路事件检测 - 默认配置
+
+# ==================== 视频跟踪配置 ====================
+tracking:
+  # 使用的YOLO模型，可选: yolov8n.pt, yolov8s.pt, yolov8m.pt, yolov8l.pt
+  # 首次运行会自动下载
+  yolo_model: "yolov8n.pt"
+  
+  # 跟踪器类型: bytetrack, botsort
+  tracker: "bytetrack"
+  
+  # 检测置信度阈值
+  conf_thresh: 0.3
+  
+  # 只保留的车辆类型 (COCO class ids)
+  # 2=car, 3=motorcycle, 5=bus, 7=truck
+  vehicle_classes: [2, 3, 5, 7]
+  
+  # 图像输入尺寸
+  imgsz: 640
+  
+  # 处理帧率（每秒提取多少帧做跟踪，None表示按原视频帧率）
+  fps: null
+
+# ==================== 时序特征配置 ====================
+features:
+  # 滑动窗口长度（时间步数），对应 UniTS 的 seq_len
+  # 比如 30 表示用 30秒/帧 的历史数据做判断
+  window_size: 30
+  
+  # 滑动窗口步长
+  stride: 1
+  
+  # 特征维度（feat_dim），对应 UniTS 的 enc_in
+  # 具体定义见 feature_engineering.py
+  feat_dim: 12
+  
+  # 最大跟踪车辆数（用于轨迹相关特征的计算上限）
+  max_tracklets: 50
+  
+  # 像素到实际速度的换算因子（如需要，可设为1表示像素速度）
+  pixel_to_meter: 1.0
+  
+  # 停止速度阈值（像素/帧）
+  stop_speed_thresh: 2.0
+
+# ==================== 事件类别配置 ====================
+events:
+  # 定义的事件类型，idx=0 必须是背景/正常
+  classes:
+    - "normal"          # 0: 正常通行
+    - "congestion"      # 1: 拥堵
+    - "accident"        # 2: 事故/碰撞
+    - "illegal_stop"    # 3: 违法停车
+    - "retrograde"      # 4: 逆行
+    - "pedestrian_intrusion" # 5: 行人闯入（可选）
+  
+  # 每个视频片段时长（秒），用于数据切分和标注
+  clip_duration: 10
+
+# ==================== UniTS 模型配置 ====================
+model:
+  # 模型类型: "units" 使用官方UniTS, "simple_tsc" 使用简化版Transformer
+  type: "simple_tsc"
+  
+  # UniTS 特有参数（仅 type=units 时有效）
+  units:
+    d_model: 128
+    n_heads: 8
+    e_layers: 2
+    patch_len: 4
+    stride: 2
+    prompt_num: 3
+    dropout: 0.1
+    
+  # 简化版 Transformer 参数（仅 type=simple_tsc 时有效）
+  simple_tsc:
+    d_model: 128
+    n_heads: 4
+    num_layers: 2
+    dim_feedforward: 256
+    dropout: 0.2
+
+# ==================== 训练配置 ====================
+training:
+  batch_size: 32
+  epochs: 50
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 10
+  val_ratio: 0.2
+  test_ratio: 0.1
+  seed: 42
+  
+  # 数据增强
+  augment:
+    noise_std: 0.01
+    scale_range: [0.95, 1.05]
+    time_warp: false
+
+# ==================== 路径配置 ====================
+paths:
+  raw_videos: "./data/raw_videos"
+  trajectories: "./data/trajectories"
+  features: "./data/features"
+  checkpoints: "./checkpoints"
+  outputs: "./outputs"
